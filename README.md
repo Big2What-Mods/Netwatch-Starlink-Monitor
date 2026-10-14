@@ -83,6 +83,6 @@ The Night City / Cyberpunk-inspired appearance is a fan-made visual treatment. R
 
 **Big2What-Mods · Built through human direction, iterative testing, and AI-assisted development.**
 
-*FUCK YEAH, SCIENCE!*
+
 
 </div>
