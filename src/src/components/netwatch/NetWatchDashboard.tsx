@@ -437,7 +437,7 @@ export function NetWatchDashboard({
           FIRMWARE & UPDATES
         </div>
         <div>
-          Firmware: {status?.deviceInfo?.softwareVersion ?? "Unavailable"}
+          {status?.deviceInfo?.softwareVersion ?? "Unavailable"}
         </div>
         <div>
           Update: {updateState.replaceAll("_", " ")}
