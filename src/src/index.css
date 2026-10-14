@@ -1,0 +1,375 @@
+﻿/* Dishylink â€” Starlink companion desktop app & browser extension design language. Theme tokens, the base reset, and
+   the handful of rules that have no Tailwind utility: keyframes, scrollbar
+   pseudo-elements, and positional selectors. Everything else is utilities in
+   the components. */
+
+/* Preflight is the base reset. It lands in @layer base, so it beats unstyled
+   browser defaults but yields to both the unlayered CSS below and to utilities
+   â€” the hand-written rules keep winning for as long as they last. */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities);
+@import "tw-animate-css";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme inline {
+  --color-background: var(--page);
+  --color-foreground: var(--ink);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--ink);
+  --color-popover: var(--surface-raised);
+  --color-popover-foreground: var(--ink);
+  --color-primary: var(--ink);
+  --color-primary-foreground: var(--page);
+  --color-fill-raised: color-mix(in srgb, var(--ink) 8%, var(--surface));
+  --color-fill-hover: color-mix(in srgb, var(--ink) 4%, transparent);
+  --color-secondary: var(--color-fill-raised);
+  --color-secondary-foreground: var(--ink);
+  --color-muted: var(--grid-dot);
+  --color-muted-foreground: var(--ink-muted);
+  --color-accent: var(--grid-dot);
+  --color-accent-foreground: var(--ink);
+  --color-destructive: var(--status-critical);
+  --color-destructive-foreground: #ffffff;
+  --color-border: var(--hairline);
+  --color-input: var(--baseline);
+  --color-ring: var(--ink-muted);
+  --color-page: var(--page);
+  --color-surface-raised: var(--surface-raised);
+  --color-ink: var(--ink);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-muted: var(--ink-muted);
+  --color-hairline: var(--hairline);
+  --color-chart-ink: var(--chart-ink);
+  --color-chart-warm: var(--chart-warm);
+  --color-series-down: var(--series-down);
+  --color-series-up: var(--series-up);
+  --color-status-good: var(--status-good);
+  --color-status-critical: var(--status-critical);
+  --font-sans: var(--font-ui);
+  --font-mono: var(--font-mono);
+  --radius-lg: 12px;
+  --radius-md: 10px;
+  --radius-sm: 8px;
+  --radius-xl: 16px;
+}
+
+/* Dark on :root so a surface that paints before any script runs comes up dark â€”
+   the extension dashboard cannot set data-theme first, as MV3 forbids inline
+   script. [data-theme="dark"] shares the block so an inner wrapper can pin dark
+   inside a light page. */
+:root,
+[data-theme="dark"] {
+  --page: #000000;
+  --surface: #0c0c0c;
+  --surface-raised: #1e1e1e;
+  --ink: #ffffff;
+  --ink-secondary: #b9b9b9;
+  --ink-muted: #7c7c7c;
+  --hairline: #232323;
+  --baseline: #3a3a3a;
+  --grid-dot: #161616;
+
+  --chart-ink: #ffffff;
+  --chart-warm: #f09048;
+
+  /* brighter download blue / upload green on the black backdrop */
+  --series-down: #5b9bff;
+  --series-up: #4ade80;
+
+  /* warm gold reads against the black dome + white clear dots */
+  --satellite: #e0a422;
+  --accent: #e0a422;
+
+  /* white light against the black sky */
+  --beam: #ffffff;
+
+  /* The physical dish is white/silver hardware â€” never a black silhouette, so
+     the body stays light in both themes and only its edge changes. */
+  --dish-body: #fff;
+  --dish-edge: rgba(255, 255, 255, 0.559);
+
+  --status-good: #4db450;
+  --status-critical: #f43f5e;
+
+  /* Obstruction colours */
+  --sky-clear: #ffffff;
+  --sky-partial: #6e0f0f;
+  --sky-obstructed: #f51e1e;
+  --sky-unmapped: #7c7c7c;
+
+  --font-ui: "Barlow", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  color-scheme: dark;
+}
+
+/* Equal specificity to :root, so it wins on source order â€” it must stay below. */
+[data-theme="light"] {
+  --page: #f4f3ee;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --ink: #111110;
+  --ink-secondary: #55544f;
+  --ink-muted: #8a8880;
+  --hairline: #e7e5dc;
+  --baseline: #c9c7bc;
+  --grid-dot: #dedcd2;
+
+  /* Starlink chart language: primary = ink, secondary = warm orange */
+  --chart-ink: #111110;
+  --chart-warm: #d1671f;
+  --series-down: #2f6fed;
+  --series-up: #1ba85f;
+  --satellite: #b7791f;
+  --accent: #b7791f;
+  --beam: var(--color-zinc-300);
+
+  --dish-body: #fff;
+  --dish-edge: #aba9a9;
+
+  --status-good: #16a34a;
+  --status-critical: #e11d48;
+
+  /* The obstruction colours.*/
+  --sky-clear: #111110;
+  --sky-partial: #efa09b;
+  --sky-obstructed: #d81b1b;
+  --sky-unmapped: #8a8880;
+
+  color-scheme: light;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
+  overflow-y: auto;
+  /* Held permanently so the page doesn't shift when content grows past one
+     screen â€” the same reason it used to sit on <html>. */
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--baseline) transparent;
+  /* The dot grid rides the scroller, not the viewport: on <body> it would now
+     sit still while the content moved over it. */
+  background-image: radial-gradient(var(--grid-dot) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+
+#root::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+#root::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#root::-webkit-scrollbar-thumb {
+  background: var(--baseline);
+  border-radius: 999px;
+}
+
+body {
+  /* Colour only. The grid moved to #root above; body keeps the page colour so
+     the canvas behind an overscroll bounce is never bare. */
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- shared primitives ----------
+   The status dot itself is utilities in TopBar/AlignmentInstruments; only its
+   halo keyframe lives here. Named status-pulse, not pulse: Tailwind's theme
+   ships its own @keyframes pulse, and this one only outranked it by being
+   unlayered. */
+
+@keyframes status-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--status-good) 45%, transparent);
+  }
+  55% {
+    box-shadow: 0 0 0 5px transparent;
+  }
+}
+
+/* The PAUSED glyph + wifi mark breathing on the meter ring: a soft dim and back,
+   not Tailwind's animate-pulse fade-to-half â€” a device that is paused, not
+   loading. */
+@keyframes paused-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* ---------- layout ----------
+   The dashboard shell and its two grids (tiles / charts) are Tailwind utilities
+   in App.tsx now; only the entrance keyframe they reference lives here. */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The travel dots on a slide-to-confirm track: a drag is the only affordance
+   that control has, so something has to say it is draggable before it is
+   touched. Staggered per dot, and reversed when the track runs leftward. */
+
+@keyframes slide-hint {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* ---------- thin scrollbar (scrollbar pseudo-elements aren't Tailwind utilities) ---------- */
+
+.thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--hairline) transparent;
+}
+/* macOS keeps its overlay scrollbar width unless appearance is reset first. */
+.thin-scroll::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 4px;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: var(--hairline);
+  border-radius: 999px;
+}
+.thin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ---------- detail panels ---------- */
+
+/* Settings rows are hairline-divided, but not at the top of a group: the first
+   row and the row right after a section label drop the border. Positional
+   selectors like these can't be expressed as inline utilities. */
+[data-settings-row] {
+  border-top: 1px solid var(--hairline);
+}
+
+[data-settings-row]:first-of-type,
+[data-section-label] + [data-settings-row] {
+  border-top: none;
+}
+
+/* The energy/data-usage bar chart (RangeBarChart) and the energy-history panel
+   are Tailwind utilities in their components now. */
+
+/* ---------- speed test ----------
+   The gauge and beam shapes carry their stroke/fill as SVG presentation
+   attributes and their text as utilities; only the keyframe is left. */
+
+/* Spin keyframe for the run button's loader (applied via an animate-[â€¦] utility
+   in SpeedTestCard; keyframes can't be expressed as a utility). */
+@keyframes speedtest-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- loaders ----------
+   SpinLoader's keyframes: plain CSS, not motion/react â€” see SpinLoader.tsx. */
+@keyframes spin-loader {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-loader-fade {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.15;
+  }
+}
+
+/* ---------- unreachable hero ---------- */
+
+@keyframes sweep {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- glass panel ----------
+   The treatment every floating surface shares â€” the toolbar at rest, the support
+   menu, select dropdowns and confirms: translucent ground, ink-tinted border,
+   backdrop blur. A flat opaque panel reads as a different surface family from
+   the rest of the UI, which is what a full-strength border makes worse. */
+
+.glass-panel {
+  border-color: color-mix(in srgb, var(--hairline) 50%, transparent);
+  background: color-mix(in srgb, var(--surface-raised) 80%, transparent);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(24px) saturate(150%);
+}
+
+[data-theme="dark"] .glass-panel,
+.glass-panel:where([data-theme="dark"] *) {
+  background: color-mix(in srgb, #0e0e0e 80%, transparent);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* ---------- desktop (Electron) title bar ---------- */
+
+/* The desktop window hides the macOS title-bar band (titleBarStyle hiddenInset), so the top bar reaches the window's top edge. Reserve room for the traffic lights, and make the bar draggable since there is no title bar left to grab */
+:root[data-host="electron"] header {
+  padding-left: 84px;
+  -webkit-app-region: drag;
+}
+:root[data-host="electron"] header button,
+:root[data-host="electron"] header a,
+:root[data-host="electron"] header input,
+:root[data-host="electron"] header [role="button"] {
+  -webkit-app-region: no-drag;
+}
+
+/* ---------- extension popup window ---------- */
+
+/* The popup window has no OS-level resize floor, unlike the desktop app's
+   BrowserWindow minWidth. */
+:root[data-host="extension"] #root {
+  min-width: 700px;
+  overflow-x: auto;
+}
+
+/* NetWatch transparent Electron canvas */
+:root[data-host='electron'] { --page: transparent; }
+:root[data-host='electron'] body, :root[data-host='electron'] #root { background-color: transparent; background-image: none; }
+
+
+/* NetWatch desktop dragging */
+:root[data-host='electron'] #root { -webkit-app-region: drag; }
+:root[data-host='electron'] button, :root[data-host='electron'] a, :root[data-host='electron'] input, :root[data-host='electron'] select, :root[data-host='electron'] textarea, :root[data-host='electron'] [role='button'], :root[data-host='electron'] [role='slider'], :root[data-host='electron'] [role='tab'] { -webkit-app-region: no-drag; }
+

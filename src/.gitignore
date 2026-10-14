@@ -1,0 +1,47 @@
+﻿node_modules
+dist
+dist-electron
+release
+.output
+.wxt
+.DS_Store
+
+collector/data
+
+**/__screenshots__/
+.vitest-attachments/
+
+# Local Starlink account session for the dev cloud proxy (never commit).
+.starlink-cookie
+.router-address
+
+# Machine-specific agent state.
+.claude/
+CLAUDE.local.md
+
+# Working notes and throwaway probe scripts. Local to whoever is mid-task.
+HANDOFF.md
+*.tmp.mts
+
+# Local working notes. Open security TODOs live here rather than in a public file.
+*.local.md
+
+# Generated macOS icon (not required for Windows repository).
+build/icon.icns
+
+# Rendered from the tones in src/lib/alertSound.ts by scripts/make-alert-sounds.mjs,
+# so the chime the tray plays cannot drift from the one the dashboard synthesises.
+build/sounds/
+
+# Landing site (landing/) â€” Astro build output, local wrangler state, and any
+# env files. Nothing here belongs in the repo, and the env entries keep a stray
+# API key from ever being committed alongside a public site.
+landing/node_modules/
+landing/dist/
+landing/.env
+landing/.dev.vars
+.wrangler/
+# Unanchored: astro writes this cache into whichever directory it is run from,
+# not only the project root.
+.astro/
+

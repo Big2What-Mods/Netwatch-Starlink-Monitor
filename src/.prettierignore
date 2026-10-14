@@ -1,0 +1,19 @@
+# Build output and dependencies.
+dist
+node_modules
+
+# Recorded history and generated data — machine-written, never hand-edited.
+server/data
+public/oui.json
+src/assets/dishes
+
+# Vitest browser-mode diagnostics.
+**/__screenshots__/
+.vitest-attachments/
+
+# Python virtual environment (local only).
+.venv
+**/.venv
+
+# Lockfile: npm owns its formatting.
+package-lock.json

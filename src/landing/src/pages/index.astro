@@ -1,0 +1,224 @@
+---
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import AppIcon from "../components/AppIcon.astro";
+import Icon from "../components/Icon.astro";
+import SectionRule from "../components/SectionRule.astro";
+import Section from "../components/Section.astro";
+import Figure from "../components/Figure.astro";
+import Button from "../components/Button.astro";
+import ShootingStars from "../components/ShootingStars.astro";
+import HeroGlow from "../components/HeroGlow.astro";
+import DownloadCard from "../components/DownloadCard.astro";
+import { readFileSync } from "node:fs";
+import { Image } from "astro:assets";
+import { GITHUB, SPONSOR, EMAIL, STARLINK_REFERRAL, downloadPlatforms } from "../constants";
+import { sections } from "../data/sections";
+
+// Real captures of the running app — no mockups, no illustrations. If a surface
+// changes in the product, replace the file here rather than redrawing anything.
+import dashboardLight from "../assets/shots/dashboard-light.png";
+import dashboardDark from "../assets/shots/dashboard-dark.png";
+import referralQr from "../assets/referral-qr.png";
+
+const title = "Dishylink — Starlink monitoring app for Mac, Windows & browsers";
+const description =
+  "Monitor your Starlink's speed, latency, power draw and obstructions in real time, and see exactly what happened during an outage. Free and open source.";
+
+const { version, platforms } = await downloadPlatforms(
+  JSON.parse(readFileSync(new URL("../../../package.json", import.meta.url), "utf-8")).version,
+);
+
+// Each hero button scrolls to the chooser and opens the platform it names, so a
+// visitor lands on their own builds rather than guessing at an architecture.
+const downloadLinks = [
+  { icon: "apple", label: "Download for Mac", platform: "macos", variant: "primary" },
+  { icon: "windows", label: "Download for Windows", platform: "windows", variant: "tinted" },
+  { icon: "browsers", label: "Download for Browser", platform: "web", variant: "secondary" },
+] as const;
+
+// Answers are escaped text. Only `aside` is rendered as markup, so a link can
+// never arrive through the answer body.
+const link = (href: string, text: string, colour: string) =>
+  `<a href="${href}" target="_blank" rel="noopener noreferrer" class="font-semibold text-ink underline decoration-1 underline-offset-2 ${colour}">${text}</a>`;
+
+const faqs: { q: string; a: string; aside?: string }[] = [
+  {
+    q: "Is this an official Starlink app?",
+    a: "No. Dishylink is an unofficial, independent project with no affiliation to SpaceX or Starlink. Starlink is a trademark of SpaceX.",
+  },
+  {
+    q: "Does it need an account or an internet connection?",
+    a: "No. Dishylink talks to your dish and router directly over your local network, so it keeps working during an outage — which is exactly when you want to see what happened. Connecting a Starlink account is optional, read-only, and only adds your plan and billing data from the cloud.",
+  },
+  {
+    q: "Is my telemetry sent anywhere?",
+    a: "Never. Everything it records is written to your own machine and stays there. No cloud sync, no analytics, no tracking, no crash reporting.",
+  },
+  {
+    q: "Will it work with my dish?",
+    a: "It reads the standard local API that Starlink terminals serve on your network, and renders the right hardware for Gen 1 through Gen 3, Mini and the Performance kits. Motorised kits additionally get stow and unstow.",
+  },
+  {
+    q: "What does it cost?",
+    a: "Nothing. It is free and open source, with no paid tier and nothing held back behind one.",
+    aside: `If it earns its place on your machine, you can ${link(SPONSOR.coffee, "buy me a coffee", "decoration-[#FFDD06]")} or ${link(SPONSOR.github, "sponsor the project", "decoration-[#ea4aaa]")} as a thank you!`,
+  },
+];
+---
+
+<Base title={title} description={description} path="/">
+  <Nav />
+
+  <main class="[counter-reset:section]">
+    <section class="relative overflow-hidden">
+      <HeroGlow />
+
+      <div
+        class="pointer-events-none absolute inset-0 opacity-50 [background-image:radial-gradient(var(--color-rule-2)_0.5px,transparent_0.5px)] [background-size:22px_22px]"
+        aria-hidden="true"
+      >
+      </div>
+
+      <ShootingStars />
+
+      <div class="relative pt-20 pb-16 text-center sm:pt-28">
+        <h1 class="mx-auto max-w-[96vw] font-display font-medium leading-[0.95] tracking-[-0.03em] text-ink-3">
+          <span class="hero-line-fade block whitespace-nowrap text-[clamp(1.8rem,4.3vw,5rem)] max-sm:whitespace-normal">Your <span class="font-bold text-ink">Starlink</span> experience.</span>
+          <span class="hero-line-fade block whitespace-nowrap text-[clamp(1.8rem,4.3vw,5rem)] max-sm:whitespace-normal">Now on <span class="font-bold text-ink">desktop</span>!</span>
+          <span class="mt-5 block whitespace-nowrap text-[clamp(1.25rem,2vw,2rem)] tracking-[-0.02em] max-sm:whitespace-normal">...because space-age internet deserves more than a mobile <span class="font-bold text-ink">app</span>.</span>
+        </h1>
+
+        <div class="mx-auto max-w-7xl px-5">
+        <p class="mx-auto mt-8 max-w-2xl text-lg text-ink-2 sm:text-xl">
+          Monitor the performance and health of your Starlink. Features live telemetry, obstruction map, speed test, latency, ping success, power draw, satellite tracking, events and outages log, alerts, and per-device data usage.
+        </p>
+
+        <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+          {
+            downloadLinks.map(({ icon, label, platform, variant }) => (
+              <Button href="#get" variant={variant} data-goto-platform={platform}>
+                <Icon name={icon} />
+                {label}
+              </Button>
+            ))
+          }
+        </div>
+
+        <p class="mt-6 font-mono text-[12px] text-ink-3">
+          Free and open source · No account · Nothing leaves your machine · Unofficial, not affiliated with SpaceX
+        </p>
+
+        <Figure
+          light={dashboardLight}
+          dark={dashboardDark}
+          alt="The Dishylink dashboard: download, upload, latency, power draw, ping success and sky-obstruction tiles above live throughput, latency and power charts, with the 3D obstruction dome and an events and outages log alongside."
+          widths={[1200, 1800, 2400]}
+          sizes="(max-width: 1200px) 100vw, 1200px"
+          class="mt-16 shadow-[0_30px_80px_-40px_rgb(0_0_0/0.6)]"
+          priority
+        />
+        </div>
+      </div>
+    </section>
+
+    <div id="features" class="mx-auto flex max-w-md items-center gap-5 px-5 py-16">
+      <span class="h-px flex-1 [background:linear-gradient(90deg,transparent,var(--color-rule-2))]"></span>
+      <span class="font-mono text-[11px] uppercase tracking-[0.35em] text-ink-3">Features</span>
+      <span class="h-px flex-1 [background:linear-gradient(90deg,var(--color-rule-2),transparent)]"></span>
+    </div>
+
+    {sections.map((section) => <Section {...section} />)}
+
+    <section id="get">
+      <SectionRule />
+      <div class="mx-auto max-w-7xl px-5 py-28 text-center lg:py-40">
+        <AppIcon class="mx-auto size-12" />
+        <h2 class="mx-auto mt-6 max-w-2xl text-section font-semibold text-balance">
+          Pick where you want it
+        </h2>
+        <p class="mx-auto mt-5 max-w-xl text-lg text-ink-2">
+          Same dashboard, same live readings, same alerts, either way you run it.
+        </p>
+
+        <div class="mx-auto mt-12 max-w-5xl text-left">
+          <DownloadCard platforms={platforms} version={version} />
+        </div>
+
+        <p class="mt-10 text-ink-2">
+          Or <a href={GITHUB} target="_blank" rel="noopener noreferrer" class="font-semibold text-ink underline underline-offset-4">build it from source</a> — it's open-source.
+        </p>
+      </div>
+    </section>
+    <section id="starlink">
+      <SectionRule />
+      <div class="mx-auto grid max-w-5xl items-center gap-12 px-5 py-24 lg:grid-cols-[1fr_auto] lg:gap-20 lg:py-32">
+        <div class="max-sm:text-center">
+          <h2 class="text-section font-semibold text-balance">Don't have a Starlink yet?</h2>
+          <p class="mt-5 max-w-xl text-lg text-ink-2">
+            Order one through my referral link. It costs you nothing extra and helps keep Dishylink
+            free.
+          </p>
+          <div class="mt-8">
+            <Button href={STARLINK_REFERRAL} variant="primary">Order Starlink</Button>
+          </div>
+        </div>
+
+        <figure class="mx-auto hidden flex-col items-center gap-4 sm:flex">
+          <div class="rounded-2xl border border-rule bg-black p-3">
+            <Image
+              src={referralQr}
+              alt="QR code that opens the Starlink order page with the referral applied"
+              width={176}
+              height={176}
+              densities={[1, 2]}
+              format="png"
+              class="size-44 [image-rendering:pixelated]"
+            />
+          </div>
+          <figcaption class="font-mono text-[12px] text-ink-3">Scan to order on your phone</figcaption>
+        </figure>
+      </div>
+    </section>
+    <section id="faq" class="bg-surface/40">
+      <SectionRule />
+      <div class="mx-auto grid max-w-7xl gap-12 px-5 py-24 lg:grid-cols-[1fr_1.4fr] lg:items-start lg:py-32">
+        <div class="lg:sticky lg:top-28">
+          <h2 class="text-section font-semibold text-balance">Frequently asked questions</h2>
+          <p class="mt-5 text-lg text-ink-2">
+            Got a different question?{" "}
+            <a href={`mailto:${EMAIL}`} class="font-semibold text-ink hover:underline">
+              Shoot here
+            </a>
+          </p>
+        </div>
+
+        <div class="divide-y divide-rule border-y border-rule">
+          {
+            faqs.map((faq) => (
+              <details class="group py-5">
+                <summary class="flex cursor-pointer list-none items-center gap-4 font-semibold">
+                  {faq.q}
+                  <svg
+                    viewBox="0 0 20 20"
+                    class="ml-auto size-4 flex-none text-ink-3 transition-transform group-open:rotate-45"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M10 4v12M4 10h12" stroke-linecap="round" />
+                  </svg>
+                </summary>
+                <p class="mt-3 text-ink-2">{faq.a}</p>
+                {faq.aside && <p class="mt-3 text-ink-2" set:html={faq.aside} />}
+              </details>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</Base>

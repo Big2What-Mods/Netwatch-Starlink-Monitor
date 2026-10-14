@@ -1,0 +1,34 @@
+﻿# Unsigned Mac build. The renderer (dist/) and the fully bundled main + preload +
+# historian (dist-electron/) are self-contained â€” every third-party dependency is
+# inlined at build time, so no node_modules ships. Developer ID signing needs a
+# paid Apple account, which this project doesn't have; identity:null tells
+# electron-builder to skip signing rather than hunt for a certificate and fail.
+appId: com.netwatch.starlinkmonitor
+productName: NetWatch Starlink Monitor
+copyright: Â© 2026 daveyhert
+
+# Ad-hoc sign the built .app so macOS will post notifications (an unsigned build
+# fails the notification call outright). Free, no Apple account â€” see the hook.
+# identity:null below stops electron-builder hunting for a Developer ID cert; the
+# hook does the ad-hoc signing afterward with the correct bundle identifier.
+afterPack: scripts/afterPack.cjs
+
+directories:
+  output: release
+  buildResources: build
+extraResources:
+  - from: build/icon.png
+    to: build/icon.png
+  - from: build/icon.ico
+    to: build/icon.ico
+  - from: build/icon.svg
+    to: build/icon.svg
+
+# The auto-update feed (electron/updater.ts) and the release workflow's publish
+# target. Draft by default (electron-builder's own default for this provider) â€”
+# the workflow never flips that, so a built release sits unlisted until someone
+# clicks "Publish release" on GitHub. electron-updater ignores drafts, so that
+# click is the actual rollout moment. Note this requires the repo to be public:
+# an installed app has no credential to authenticate a private-repo download.
+
+
