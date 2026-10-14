@@ -4,7 +4,7 @@
 
 ### NIGHT CITY NODE · Big2What-Mods
 
-![NetWatch Starlink Monitor — reference image](github%20ref%20pic.png)
+![NetWatch Starlink Monitor — reference image](github%20ref%20pic.png?v=542c4c6)
 
 **A Cyberpunk 2077-inspired Windows desktop dashboard for monitoring Starlink connectivity.**
 
