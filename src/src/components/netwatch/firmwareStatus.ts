@@ -14,14 +14,20 @@ const clear = (detail: string): RebootStatus => ({ shortLabel: "No reboot", deta
 
 export function dishRebootStatus(status: DishStatusJson | null): RebootStatus {
   if (!status) return unknown("Dish telemetry unavailable");
-  const seconds = status.secondsUntilSwupdateRebootPossible;
-  if (typeof seconds === "number" && Number.isFinite(seconds)) {
-    if (seconds >= 0) return pending(`Update reboot possible in approximately ${Math.ceil(seconds / 60)} minutes`);
-    if (seconds === -1) return clear("Dish reports no pending software-update reboot");
-  }
   const update = status.softwareUpdateState?.toUpperCase();
-  if (update && update !== "IDLE" && update !== "UNKNOWN") return pending(`Dish software update state: ${update.replaceAll("_", " ")}`);
-  return unknown("Dish did not report a reliable reboot-required state");
+  const seconds = status.secondsUntilSwupdateRebootPossible;
+
+  // The explicit updater state wins over a stale or contradictory countdown.
+  // In particular, REBOOT_REQUIRED must never appear alongside "No reboot".
+  if (update === "REBOOT_REQUIRED")
+    return pending("Dish reports REBOOT REQUIRED for its software update");
+  if (typeof seconds === "number" && Number.isFinite(seconds) && seconds >= 0)
+    return pending(`Dish update reboot possible in approximately ${Math.ceil(seconds / 60)} minutes`);
+  if (update && update !== "IDLE" && update !== "UNKNOWN")
+    return pending(`Dish software update state: ${update.replaceAll("_", " ")}`);
+  if (seconds === -1 && update === "IDLE")
+    return clear("Dish reports no pending software-update reboot");
+  return unknown("Dish did not provide consistent update and reboot telemetry");
 }
 
 /** The router exposes update-installation state, not a reboot-required field. */
