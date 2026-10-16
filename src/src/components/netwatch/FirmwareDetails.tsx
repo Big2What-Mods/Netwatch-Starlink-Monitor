@@ -53,9 +53,11 @@ export function FirmwareDetails({ dishStatus, routerSnapshot, events }: Props) {
   const routerEvents = updates.filter((event) => /ROUTER|WIFI/i.test(event.cause) || /router/i.test(outageEventLabel(event.cause)));
   const dishEvents = updates.filter((event) => !routerEvents.includes(event));
   const dishUpdate = dishStatus?.softwareUpdateState?.replaceAll("_", " ") ?? "Unavailable";
-  const routerUpdate = routerSnapshot.reachable !== true ? "Unavailable" :
-    routerSnapshot.status?.alerts?.installPending === true ? "Installation pending" :
-    routerSnapshot.status?.alerts?.installPending === false ? "No install alert" : "Not reported";
+  // Starlink proto3 JSON omits false boolean alerts. For a live router status,
+  // an absent installPending flag means no pending installation, not unknown.
+  const routerUpdate = routerSnapshot.reachable !== true || !routerSnapshot.status ? "Unavailable" :
+    routerSnapshot.status.alerts?.installPending === true ? "Installation pending" :
+    "No update pending";
   return (
     <div className="mt-4 grid gap-4 md:grid-cols-2">
       <DeviceSection title="DISH" version={dishStatus?.deviceInfo?.softwareVersion}
