@@ -3,7 +3,7 @@ import type { ToolbarItemId } from "../components/toolbar/AppToolbar";
 import { useHashRoute } from "./useHashRoute";
 
 export type PanelName =
-  "speedtest" | "alignment" | "datausage" | "network" | "account" | "settings" | "terminal" | "logs";
+  "speedtest" | "alignment" | "datausage" | "network" | "account" | "settings" | "terminal" | "logs" | "firmware";
 
 export type SettingsTab = "starlink" | "router" | "app";
 
