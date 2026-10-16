@@ -435,14 +435,14 @@ export function NetWatchDashboard({
         <div style={{ color: "#00c8f8", fontWeight: 700, marginBottom: 5, fontSize: 13 }}>
           FIRMWARE & UPDATES
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 6, fontSize: 12 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 2, fontSize: 11, lineHeight: "14px" }}>
           {([["DISH", dishRebootStatus(status)], ["ROUTER UPDATE", routerUpdateStatus(routerSnapshot)]] as const).map(([name, state]) => (
-            <span key={name} title={state.detail} style={{ whiteSpace: "nowrap" }}>
+            <div key={name} title={state.detail} style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {name}: <span style={{ color: state.color }}>{state.shortLabel}</span>
-            </span>
+            </div>
           ))}
         </div>
-        <button type="button" onClick={onOpenFirmware} style={{ marginTop: 6, width: "100%", border: "1px solid #00c8f8", background: "rgba(0,30,42,.85)", color: "#00c8f8", borderRadius: 4, fontSize: 12, padding: "3px 5px", cursor: "pointer" }}>
+        <button type="button" onClick={onOpenFirmware} style={{ marginTop: 4, width: "100%", border: "1px solid #00c8f8", background: "rgba(0,30,42,.85)", color: "#00c8f8", borderRadius: 4, fontSize: 11, padding: "2px 5px", cursor: "pointer" }}>
           VIEW FIRMWARE DETAILS
         </button>
       </section>
