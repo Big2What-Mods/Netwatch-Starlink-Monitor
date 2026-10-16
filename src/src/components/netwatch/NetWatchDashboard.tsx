@@ -9,7 +9,7 @@ import { canonicalCause, outageEventMeta, type TelemetrySample, type OutageEvent
 import { formatClockTimeShort, formatEventDuration } from "../../lib/format";
 import type { DishStatusJson, DishObstructionMapJson } from "@core/dishClient";
 import type { RouterStatusSnapshot } from "../../lib/routerStatusFeed";
-import { dishRebootStatus, routerUpdateStatus } from "./firmwareStatus";
+import { dishUpdateStatus, routerUpdateStatus } from "./firmwareStatus";
 import { ObstructionDome } from "../obstruction/ObstructionDome";
 import type { DishConnectionState } from "../../hooks/useDishTelemetry";
 import type { ObserverLocation } from "../../lib/satellites";
@@ -436,7 +436,7 @@ export function NetWatchDashboard({
           FIRMWARE & UPDATES
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 2, fontSize: 11, lineHeight: "14px" }}>
-          {([["DISH", dishRebootStatus(status)], ["ROUTER UPDATE", routerUpdateStatus(routerSnapshot)]] as const).map(([name, state]) => (
+          {([["DISH UPDATE", dishUpdateStatus(status)], ["ROUTER UPDATE", routerUpdateStatus(routerSnapshot)]] as const).map(([name, state]) => (
             <div key={name} title={state.detail} style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {name}: <span style={{ color: state.color }}>{state.shortLabel}</span>
             </div>
