@@ -24,12 +24,23 @@ export function dishRebootStatus(status: DishStatusJson | null): RebootStatus {
   return unknown("Dish did not report a reliable reboot-required state");
 }
 
+/** The router exposes update-installation state, not a reboot-required field. */
+export function routerUpdateStatus(snapshot: RouterStatusSnapshot): RebootStatus {
+  if (snapshot.reachable !== true || !snapshot.status)
+    return unknown("Router status unavailable or stale");
+  // Starlink proto3 omits false booleans; DishyLink treats absent flags as clear.
+  return snapshot.status.alerts?.installPending === true
+    ? pending("Router software update installation pending")
+    : { shortLabel: "No update", detail: "No router software update installation pending", color: "#4fe1a2", state: "clear" };
+}
+
+/** No definitive router reboot requirement is exposed by this API. */
 export function routerRebootStatus(snapshot: RouterStatusSnapshot): RebootStatus {
-  if (snapshot.reachable !== true || !snapshot.status) return unknown("Router status is unavailable or stale");
-  // The Starlink proto3 JSON omits false boolean alert flags. DishyLink
-  // interprets a missing installPending key in a live router reply as clear.
-  // This reports UPDATE installation state, not an unsupported reboot countdown.
-  if (snapshot.status.alerts?.installPending === true)
-    return pending("Router reports a pending software-update installation; reboot timing is not exposed");
-  return { shortLabel: "No update", detail: "Router reports no pending software-update installation; separate reboot requirement is not exposed", color: "#4fe1a2", state: "clear" };
+  if (snapshot.reachable !== true || !snapshot.status)
+    return unknown("Router status unavailable or stale");
+  return unknown(
+    snapshot.status.alerts?.installPending === true
+      ? "Software update installation pending; router reboot requirement is not separately reported"
+      : "No software update pending; router reboot requirement is not separately reported"
+  );
 }
