@@ -8,6 +8,8 @@ import { formatThroughputLabel, formatThroughputTick } from "../../lib/format";
 import { canonicalCause, outageEventMeta, type TelemetrySample, type OutageEvent } from "@core/telemetry";
 import { formatClockTimeShort, formatEventDuration } from "../../lib/format";
 import type { DishStatusJson, DishObstructionMapJson } from "@core/dishClient";
+import type { RouterStatusSnapshot } from "../../lib/routerStatusFeed";
+import { dishRebootStatus, routerRebootStatus } from "./firmwareStatus";
 import { ObstructionDome } from "../obstruction/ObstructionDome";
 import type { DishConnectionState } from "../../hooks/useDishTelemetry";
 import type { ObserverLocation } from "../../lib/satellites";
@@ -27,6 +29,7 @@ import {
 
 interface NetWatchDashboardProps {
   status: DishStatusJson | null;
+  routerSnapshot: RouterStatusSnapshot;
   observerLocation: ObserverLocation | null;
   connectionState: DishConnectionState;
   liveDownlink: { value: string; unit: string };
@@ -39,6 +42,7 @@ interface NetWatchDashboardProps {
   onOpenSettings: () => void;
   onOpenSpeedTest: () => void;
   onOpenLogs: () => void;
+  onOpenFirmware: () => void;
 }
 
 function weatherIconFor(code: number) {
@@ -70,6 +74,7 @@ function weatherDescription(code: number): string {
 }
 export function NetWatchDashboard({
   status,
+  routerSnapshot,
   observerLocation,
   connectionState,
   liveDownlink,
@@ -82,6 +87,7 @@ export function NetWatchDashboard({
   onOpenSettings,
   onOpenSpeedTest,
   onOpenLogs,
+  onOpenFirmware,
 }: NetWatchDashboardProps) {
   const { weather, loading: weatherLoading, error: weatherError } =
     useNetWatchWeather(observerLocation);
@@ -94,13 +100,6 @@ export function NetWatchDashboard({
     const timer = setInterval(() => setSystemTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-  const updateState = status?.softwareUpdateState ?? "UNKNOWN";
-  const rebootSeconds = status?.secondsUntilSwupdateRebootPossible;
-
-  const rebootCountdown =
-    rebootSeconds !== undefined && rebootSeconds >= 0
-      ? `${Math.floor(rebootSeconds / 60)} minutes`
-      : "No pending reboot";
 
   return (
     <main className="netwatch-dashboard" style={{ position: "relative", width: 674, height: 787, backgroundImage: "url(/NetWatch_clean_interface_template.png)", backgroundSize: "100% 100%", backgroundRepeat: "no-repeat" }}>
@@ -433,18 +432,19 @@ export function NetWatchDashboard({
           overflow: "hidden",
         }}
       >
-        <div style={{ color: "#00c8f8", fontWeight: 700, marginBottom: 5 }}>
+        <div style={{ color: "#00c8f8", fontWeight: 700, marginBottom: 5, fontSize: 13 }}>
           FIRMWARE & UPDATES
         </div>
-        <div>
-          {status?.deviceInfo?.softwareVersion ?? "Unavailable"}
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 6, fontSize: 12 }}>
+          {([["DISH", dishRebootStatus(status)], ["ROUTER", routerRebootStatus(routerSnapshot)]] as const).map(([name, state]) => (
+            <span key={name} title={state.detail} style={{ whiteSpace: "nowrap" }}>
+              {name}: <span style={{ color: state.color }}>{state.shortLabel}</span>
+            </span>
+          ))}
         </div>
-        <div>
-          Update: {updateState.replaceAll("_", " ")}
-        </div>
-        <div>
-          Reboot: {rebootCountdown}
-        </div>
+        <button type="button" onClick={onOpenFirmware} style={{ marginTop: 6, width: "100%", border: "1px solid #00c8f8", background: "rgba(0,30,42,.85)", color: "#00c8f8", borderRadius: 4, fontSize: 12, padding: "3px 5px", cursor: "pointer" }}>
+          VIEW FIRMWARE DETAILS
+        </button>
       </section>
             <nav
         className="netwatch-controls"
