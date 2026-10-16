@@ -35,6 +35,24 @@ export function dishRebootStatus(status: DishStatusJson | null): RebootStatus {
   return unknown("Dish did not report a definitive reboot-required state");
 }
 
+/** Dashboard update status is separate from the dish's reboot requirement. */
+export function dishUpdateStatus(status: DishStatusJson | null): RebootStatus {
+  if (!status) return unknown("Dish telemetry unavailable");
+  const update = status.softwareUpdateState?.toUpperCase();
+  if (update === "IDLE")
+    return { shortLabel: "No update", detail: "Dish software updater is idle", color: "#4fe1a2", state: "clear" };
+  if (!update || update === "UNKNOWN")
+    return unknown("Dish software update state unavailable");
+  if (update === "REBOOT_REQUIRED")
+    return pending("Dish software update requires a reboot");
+  return {
+    shortLabel: update.replaceAll("_", " ").toLowerCase(),
+    detail: `Dish software update state: ${update.replaceAll("_", " ")}`,
+    color: "#ffbf58",
+    state: "pending",
+  };
+}
+
 /** The router exposes update-installation state, not a reboot-required field. */
 export function routerUpdateStatus(snapshot: RouterStatusSnapshot): RebootStatus {
   if (snapshot.reachable !== true || !snapshot.status)
