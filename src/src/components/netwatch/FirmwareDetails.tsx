@@ -1,7 +1,7 @@
 import type { DishStatusJson } from "@core/dishClient";
 import { outageEventLabel, type OutageEvent } from "@core/telemetry";
 import type { RouterStatusSnapshot } from "../../lib/routerStatusFeed";
-import { dishRebootStatus, routerRebootStatus, type RebootStatus } from "./firmwareStatus";
+import { dishRebootStatus, routerRebootStatus, routerUpdateStatus, type RebootStatus } from "./firmwareStatus";
 import { formatClockTimeShort } from "../../lib/format";
 
 interface Props {
@@ -55,9 +55,9 @@ export function FirmwareDetails({ dishStatus, routerSnapshot, events }: Props) {
   const dishUpdate = dishStatus?.softwareUpdateState?.replaceAll("_", " ") ?? "Unavailable";
   // Starlink proto3 JSON omits false boolean alerts. For a live router status,
   // an absent installPending flag means no pending installation, not unknown.
-  const routerUpdate = routerSnapshot.reachable !== true || !routerSnapshot.status ? "Unavailable" :
-    routerSnapshot.status.alerts?.installPending === true ? "Installation pending" :
-    "No update pending";
+  const routerUpdate = routerUpdateStatus(routerSnapshot).state === "pending"
+    ? "Installation pending"
+    : routerUpdateStatus(routerSnapshot).state === "clear" ? "No update pending" : "Unavailable";
   return (
     <div className="mt-4 grid gap-4 md:grid-cols-2">
       <DeviceSection title="DISH" version={dishStatus?.deviceInfo?.softwareVersion}
