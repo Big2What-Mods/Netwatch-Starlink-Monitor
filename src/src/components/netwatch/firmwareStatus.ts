@@ -23,11 +23,16 @@ export function dishRebootStatus(status: DishStatusJson | null): RebootStatus {
     return pending("Dish reports REBOOT REQUIRED for its software update");
   if (typeof seconds === "number" && Number.isFinite(seconds) && seconds >= 0)
     return pending(`Dish update reboot possible in approximately ${Math.ceil(seconds / 60)} minutes`);
+  // FETCHING and other updater phases do not themselves require a reboot.
+  // Only a reboot-required state or an actual nonnegative reboot countdown
+  // can light the reboot indicator amber.
+  if (seconds === -1)
+    return clear(update && update !== "IDLE"
+      ? `Dish update is ${update.replaceAll("_", " ").toLowerCase()}; no reboot is currently scheduled`
+      : "Dish reports no pending software-update reboot");
   if (update && update !== "IDLE" && update !== "UNKNOWN")
-    return pending(`Dish software update state: ${update.replaceAll("_", " ")}`);
-  if (seconds === -1 && update === "IDLE")
-    return clear("Dish reports no pending software-update reboot");
-  return unknown("Dish did not provide consistent update and reboot telemetry");
+    return unknown(`Dish update is ${update.replaceAll("_", " ").toLowerCase()}; reboot requirement not reported`);
+  return unknown("Dish did not report a definitive reboot-required state");
 }
 
 /** The router exposes update-installation state, not a reboot-required field. */
