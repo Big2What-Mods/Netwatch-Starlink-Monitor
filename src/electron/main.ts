@@ -65,7 +65,9 @@ const trayOutlinePath = join(here, "../build/trayTemplateOutline.png");
 
 // Drives the menu-bar title and per-app data directory; must be set before anything
 // reads it.
-app.setName("Dishylink");
+app.setName("NetWatch Starlink Monitor");
+// Windows toast attribution uses the app identity, not the alert title.
+if (process.platform === "win32") app.setAppUserModelId("com.netwatch.starlinkmonitor");
 
 // Must run before the app is ready, so it's at module load rather than in whenReady.
 registerAppProtocolScheme();
@@ -528,8 +530,8 @@ function registerCloudHandlers(): void {
  *  a binary it can't verify. */
 function undeliverableReason(): string {
   return app.isPackaged
-    ? "macOS isnâ€™t delivering notifications â€” allow Dishylink under System Settings â–¸ Notifications."
-    : "Native notifications need the installed Dishylink app; a dev run canâ€™t post them.";
+    ? "macOS isnâ€™t delivering notifications â€” allow NetWatch Starlink Monitor under System Settings â–¸ Notifications."
+    : "Native notifications need the installed NetWatch Starlink Monitor app; a dev run canâ€™t post them.";
 }
 
 /** The one notification answer every surface renders: stored request + channel as last
