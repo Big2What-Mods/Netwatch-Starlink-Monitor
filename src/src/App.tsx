@@ -1,6 +1,8 @@
 ﻿import { OutageLog } from "./components/alerts/OutageLog";
 import { NetWatchDashboard } from "./components/netwatch/NetWatchDashboard";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { subscribeRouterStatus, type RouterStatusSnapshot } from "./lib/routerStatusFeed";
+import { FirmwareDetails } from "./components/netwatch/FirmwareDetails";
 import { useDishTelemetry } from "./hooks/useDishTelemetry";
 import { useLanPresence } from "./hooks/useLanPresence";
 import { AnimatePresence, motion } from "motion/react";
@@ -48,6 +50,9 @@ export default function App() {
   const windowMinutes = 15;
 
   const telemetry = useDishTelemetry();
+  // Reuse the shared router status poll; do not add another router request.
+  const [routerSnapshot, setRouterSnapshot] = useState<RouterStatusSnapshot>({ status: null, reachable: null });
+  useEffect(() => subscribeRouterStatus(setRouterSnapshot), []);
   const { observerLocation, onLocationSaved, onClearLocation } = useObserverLocation(
     telemetry.dishLocation?.lla,
   );
@@ -106,6 +111,7 @@ export default function App() {
           >
             <NetWatchDashboard
               status={status}
+              routerSnapshot={routerSnapshot}
               observerLocation={observerLocation}
               connectionState={telemetry.connectionState}
               liveDownlink={liveDownlink}
@@ -118,6 +124,7 @@ export default function App() {
               onOpenSettings={() => setOpenPanel("settings")}
               onOpenSpeedTest={() => setOpenPanel("speedtest")}
               onOpenLogs={() => setOpenPanel("logs")}
+              onOpenFirmware={() => setOpenPanel("firmware")}
             />          </motion.div>
         )}
       </AnimatePresence>
@@ -126,6 +133,12 @@ export default function App() {
       {openPanel === "logs" && (
         <DetailsModal title="Event Log" onClose={() => setOpenPanel(null)} size="wide">
           <OutageLog outageEvents={[...outageEvents, ...thermalEvents]} />
+        </DetailsModal>
+      )}
+      {/* Dish and router firmware details */}
+      {openPanel === "firmware" && (
+        <DetailsModal title="Firmware & Updates" onClose={() => setOpenPanel(null)} size="wide">
+          <FirmwareDetails dishStatus={status} routerSnapshot={routerSnapshot} events={[...outageEvents, ...thermalEvents]} />
         </DetailsModal>
       )}
       {/* Terminal modal */}
