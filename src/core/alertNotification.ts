@@ -87,13 +87,13 @@ export function notificationsProblem(state: NotificationState): string | null {
  *  alerts panel confirm in the same words. */
 export const NOTIFICATIONS_ON_CONFIRMATION = {
   title: "Notifications on",
-  body: "Dishylink will alert you about Starlink outages.",
+  body: "NetWatch Starlink Monitor will alert you about Starlink outages.",
 };
 
 function deviceName(source: AlertTransition["source"]): string {
   if (source === "dish") return "Dish";
   if (source === "router") return "Router";
-  return "Dishylink";
+  return "NetWatch Starlink Monitor";
 }
 
 /**
