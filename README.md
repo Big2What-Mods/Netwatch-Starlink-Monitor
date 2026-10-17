@@ -49,6 +49,12 @@ The customized Windows interface brings together:
 
 Data availability depends on the connected Starlink hardware, permissions, supported services, and local system capabilities. Some readings or tools may be unavailable depending on configuration.
 
+## Hardware monitoring requirement
+
+**Bezel** is required for the hardware-monitoring setup used with NetWatch. Install and run Bezel when using the CPU, GPU, RAM, and VRAM monitoring features.
+
+This is a hardware-monitoring requirement, not a requirement for the Starlink connection-monitoring features.
+
 ## Windows build
 
 The project files are inside [`src/`](src/), not at this repository's top level.
